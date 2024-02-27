@@ -11,7 +11,7 @@ using Opsive.UltimateCharacterController.Items.Actions.Modules.Melee;
 using Opsive.UltimateCharacterController.Items.Actions.Modules.Shootable;
 using Opsive.UltimateCharacterController.Character;
 using Opsive.Shared.Events;
-using static UnityEditor.FilePathAttribute;
+
 using Opsive.UltimateCharacterController.Character.Abilities;
 
 public class AtlasNetworkCharacter : NetworkBehaviour, INetworkCharacter
