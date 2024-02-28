@@ -11,6 +11,11 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
     private string _horizontalAxisName = "Horizontal";
     private string _verticalAxisName = "Vertical";
+    private string _mouseXAxisName = "Mouse X";
+    private string _mouseYAxisName = "Mouse Y";
+    private string _controllerHorizontalLookInputName = "Controller X";
+    private string _controllerVerticalLookInputName = "Controller Y";
+
 
     public UCCInput CurrentInput => _receivedCurrentInput;
     public UCCInput PreviousInput => _receivedPreviousInput;
@@ -20,7 +25,7 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
     protected UnityEngine.InputSystem.PlayerInput m_PlayerInput;
     protected Dictionary<InputActionMap, Dictionary<string, InputAction>> m_InputActionByName = new Dictionary<InputActionMap, Dictionary<string, InputAction>>();
 
-    [Networked]
+  //  [Networked]
     UCCInput _receivedCurrentInput { get; set; }
 
     UCCInput _receivedPreviousInput;
@@ -71,12 +76,16 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
         _accumulatedInput.SetAxisByName(_horizontalAxisName, GetAxisLocalValue(_horizontalAxisName));
         _accumulatedInput.SetAxisByName(_verticalAxisName, GetAxisLocalValue(_verticalAxisName));
-        
+        _accumulatedInput.SetAxisByName(_mouseXAxisName, GetAxisLocalValue(_mouseXAxisName));
+        _accumulatedInput.SetAxisByName(_mouseYAxisName, GetAxisLocalValue(_mouseYAxisName));
+        _accumulatedInput.SetAxisByName(_controllerHorizontalLookInputName, GetAxisLocalValue(_controllerHorizontalLookInputName));
+        _accumulatedInput.SetAxisByName(_controllerVerticalLookInputName, GetAxisLocalValue(_controllerVerticalLookInputName));
+
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (Object.InputAuthority != PlayerRef.None)
+        if ( HasStateAuthority) //   Object.InputAuthority != PlayerRef.None)
         {
             if (GetInput(out UCCInput input) == true)
             {
