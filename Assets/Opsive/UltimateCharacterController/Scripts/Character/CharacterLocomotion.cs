@@ -32,7 +32,7 @@ namespace Opsive.UltimateCharacterController.Character
     public class CharacterLocomotion : StateBehavior, IForceObject
     {
         // Padding value used to prevent the character's collider from overlapping the environment collider. Overlapped colliders don't work well with ray casts.
-        private const float c_ColliderSpacing = 0.01f;
+        protected const float c_ColliderSpacing = 0.01f;
 
         [Tooltip("Should root motion be used to move the character?")]
         [SerializeField] protected bool m_UseRootMotionPosition;
@@ -179,18 +179,18 @@ namespace Opsive.UltimateCharacterController.Character
         protected Rigidbody m_Rigidbody;
         protected CharacterLayerManager m_CharacterLayerManager;
 
-        protected Vector2 m_InputVector;
+        private Vector2 m_InputVector;
         protected Vector3 m_DeltaRotation;
-        private Vector3 m_DesiredMovement;
+        protected Vector3 m_DesiredMovement;
         private Quaternion m_DesiredRotation = Quaternion.identity;
-        private Vector3 m_LastDesiredMovement;
+        protected Vector3 m_LastDesiredMovement;
         private Quaternion m_LastDesiredRotation = Quaternion.identity;
 
         protected Vector3 m_Position;
         protected Quaternion m_Rotation;
 
-        private float m_Height;
-        private float m_Radius = float.MaxValue;
+        protected float m_Height;
+        protected float m_Radius = float.MaxValue;
         private bool m_CollisionLayerEnabled = true;
         protected Collider[] m_Colliders;
         private Collider[] m_IgnoredColliders;
@@ -217,37 +217,37 @@ namespace Opsive.UltimateCharacterController.Character
 
         protected RaycastHit[] m_CastResults;
         protected UnityEngineUtility.RaycastHitComparer m_CastHitComparer = new UnityEngineUtility.RaycastHitComparer();
-        private int m_ColliderIndex;
-        private Dictionary<RaycastHit, int> m_ColliderIndexMap;
-        private RaycastHit[] m_CombinedCastResults;
+        protected int m_ColliderIndex;
+        protected Dictionary<RaycastHit, int> m_ColliderIndexMap;
+        protected RaycastHit[] m_CombinedCastResults;
         private Collider[] m_OverlapCastResults;
 
-        private bool m_Grounded;
-        private RaycastHit m_GroundedRaycastHit;
-        private Collider m_CharacterGroundedCollider;
-        private RaycastHit m_EmptyRaycastHit = new RaycastHit();
-        private bool m_ForceUngrounded = false;
-        private float m_GravityAccumulation;
-        private bool m_ForceStickToGround;
-        private bool m_SlopedGround;
+        protected bool m_Grounded;
+        protected RaycastHit m_GroundedRaycastHit;
+        protected Collider m_CharacterGroundedCollider;
+        protected RaycastHit m_EmptyRaycastHit = new RaycastHit();
+        protected bool m_ForceUngrounded = false;
+        protected float m_GravityAccumulation;
+        protected bool m_ForceStickToGround;
+        protected bool m_SlopedGround;
 
-        private Vector3 m_MotorThrottle;
-        private float m_SlopeFactor = 1;
-        private Vector3 m_RootMotionDeltaPosition;
+        protected Vector3 m_MotorThrottle;
+        protected float m_SlopeFactor = 1;
+        protected Vector3 m_RootMotionDeltaPosition;
         private Quaternion m_RootMotionDeltaRotation = Quaternion.identity;
-        private Quaternion m_PrevMotorRotation;
+        protected Quaternion m_PrevMotorRotation;
 
-        private Vector3 m_ExternalForce;
+        protected Vector3 m_ExternalForce;
         private Vector3[] m_SoftForceFrames;
 
         protected Transform m_MovingPlatform;
         protected Vector3 m_MovingPlatformRelativePosition;
         protected Quaternion m_MovingPlatformRotationOffset;
         private Vector3 m_PreMovingPlatformMovement;
-        private Vector3 m_MovingPlatformMovement;
+        protected Vector3 m_MovingPlatformMovement;
         protected Quaternion m_MovingPlatformRotation = Quaternion.identity;
         private Quaternion m_PrevMovingPlatformRotation;
-        private bool m_MovingPlatformOverride;
+        protected bool m_MovingPlatformOverride;
 
         protected Vector3 m_MovingPlatformDisconnectMovement;
         protected Quaternion m_MovingPlatformDisconnectRotation = Quaternion.identity;
@@ -255,15 +255,15 @@ namespace Opsive.UltimateCharacterController.Character
         protected float m_MovingPlatformDisconnectVelocityMaxMagnitude = 0.01f;
         protected float m_MovingPlatformDisconnectTorqueMaxMagnitude = 0.01f;
 
-        private Vector3 m_Velocity;
+        protected Vector3 m_Velocity;
         private Quaternion m_Torque;
-        private Action<RaycastHit> m_OnCollision;
+        protected Action<RaycastHit> m_OnCollision;
 
         private int m_SimulationIndex = -1;
         private Transform m_RigidbodyParent;
         private bool m_Interpolate = true;
 
-        [Shared.Utility.NonSerialized] public Vector2 InputVector { get { return m_InputVector; } set { m_InputVector = value; } }
+        [Shared.Utility.NonSerialized] public virtual Vector2 InputVector { get { return m_InputVector; } set { m_InputVector = value; } }
         [Shared.Utility.NonSerialized] public Vector3 DeltaRotation { get { return m_DeltaRotation; } set { m_DeltaRotation = value; } }
         [Shared.Utility.NonSerialized] public Quaternion DesiredRotation { get { return m_DesiredRotation; } set { m_DesiredRotation = value; } }
         [Shared.Utility.NonSerialized] public Vector3 DesiredMovement { get { return m_DesiredMovement; } set { m_DesiredMovement = value; } }
@@ -549,8 +549,10 @@ namespace Opsive.UltimateCharacterController.Character
             }
 
             // Assign the inputs.
-            m_InputVector.x = horizontalMovement;
-            m_InputVector.y = forwardMovement;
+            //m_InputVector.x = horizontalMovement;
+            //m_InputVector.y = forwardMovement;
+            InputVector = new Vector2(horizontalMovement, forwardMovement);
+
             m_DeltaRotation.Set(0, deltaYawRotation, 0);
             //m_InputVector.x = 1;
             //m_InputVector.y = 1;
@@ -859,8 +861,8 @@ namespace Opsive.UltimateCharacterController.Character
 
                 // Apply a multiplier if the character is moving backwards.
                 var backwardsMultiplier = 1f;
-                if (m_InputVector.y < 0) {
-                    backwardsMultiplier *= Mathf.Lerp(1, m_MotorBackwardsMultiplier, Mathf.Abs(m_InputVector.y));
+                if (InputVector.y < 0) {
+                    backwardsMultiplier *= Mathf.Lerp(1, m_MotorBackwardsMultiplier, Mathf.Abs(InputVector.y));
                 }
                 // As the character changes rotation the same local motor throttle force should be applied. This is most apparent when the character is being aligned to the ground
                 // and the local y direction changes.
@@ -868,7 +870,7 @@ namespace Opsive.UltimateCharacterController.Character
                 var rotation = Quaternion.Slerp(m_PrevMotorRotation, m_Rotation, m_PreviousAccelerationInfluence);
                 var acceleration = m_SlopeFactor * backwardsMultiplier * m_MotorAcceleration * m_TimeScale * Time.timeScale;
                 // Convert input into motor forces. Normalize the input vector to prevent the diagonal from moving faster.
-                var normalizedInputVector = m_InputVector.normalized * Mathf.Max(Mathf.Abs(m_InputVector.x), Mathf.Abs(m_InputVector.y));
+                var normalizedInputVector = InputVector.normalized * Mathf.Max(Mathf.Abs(InputVector.x), Mathf.Abs(InputVector.y));
                 m_MotorThrottle = MathUtility.TransformDirection(new Vector3(prevLocalMotorThrottle.x + normalizedInputVector.x * acceleration.x,
                                             prevLocalMotorThrottle.y, prevLocalMotorThrottle.z + normalizedInputVector.y * acceleration.z), rotation) * frictionValue;
             }
@@ -1133,7 +1135,7 @@ namespace Opsive.UltimateCharacterController.Character
         /// <param name="moveDirection">The move direction of the collider.</param>
         /// <param name="offset">The resulting offset of the penetrations.</param>
         /// <returns>True if the penetrations have been resolved with the specified collider.</returns>
-        private bool ResolvePenetrations(Collider activeCollider, Vector3 moveDirection, out Vector3 offset)
+        protected bool ResolvePenetrations(Collider activeCollider, Vector3 moveDirection, out Vector3 offset)
         {
             offset = Vector3.zero;
             var resolved = false;
@@ -1164,7 +1166,7 @@ namespace Opsive.UltimateCharacterController.Character
         /// <param name="point">The point at which to apply the push force.</param>
         /// <param name="normal">The normal of the hit Rigidbody.</param>
         /// <param name="movementMagnitude">The magnitude of the character's movement.</param>
-        private void PushRigidbody(Rigidbody targetRigidbody, Vector3 point, Vector3 normal, float movementMagnitude)
+        protected void PushRigidbody(Rigidbody targetRigidbody, Vector3 point, Vector3 normal, float movementMagnitude)
         {
             if (targetRigidbody == null || targetRigidbody.isKinematic) {
                 return;
@@ -1177,7 +1179,7 @@ namespace Opsive.UltimateCharacterController.Character
         /// Determine if the character is on the ground.
         /// </summary>
         /// <param name="sendGroundedEvents">Should the events be sent if the grounded status changes?</param>
-        private void DetectGroundCollision(bool sendGroundedEvents = true)
+        protected virtual void DetectGroundCollision(bool sendGroundedEvents = true)
         {
             if (!UsingGroundCollisionDetection) {
                 return;
@@ -1374,7 +1376,7 @@ namespace Opsive.UltimateCharacterController.Character
         /// <param name="distance">The distance of the cast.</param>
         /// <param name="drawDebugLine">Should the debug lines be drawn?</param>
         /// <returns>The number of objects hit from the cast.</returns>
-        private int CombinedCast(Vector3 position, Vector3 direction, float distance
+        protected int CombinedCast(Vector3 position, Vector3 direction, float distance
 #if UNITY_EDITOR
             , bool drawDebugLine = false
 #endif
@@ -1586,7 +1588,7 @@ namespace Opsive.UltimateCharacterController.Character
         /// </summary>
         /// <param name="hitTransform">The name of the possible moving platform transform.</param>
         /// <returns>True if the platform changed.</returns>
-        private bool UpdateMovingPlatformTransform(Transform hitTransform)
+        protected bool UpdateMovingPlatformTransform(Transform hitTransform)
         {
             // Update the moving platform if on the ground and the ground transform is a moving platform.
             if (hitTransform != null) {

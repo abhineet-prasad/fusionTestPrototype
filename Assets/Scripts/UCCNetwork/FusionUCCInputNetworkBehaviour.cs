@@ -25,7 +25,7 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
     protected UnityEngine.InputSystem.PlayerInput m_PlayerInput;
     protected Dictionary<InputActionMap, Dictionary<string, InputAction>> m_InputActionByName = new Dictionary<InputActionMap, Dictionary<string, InputAction>>();
 
-  //  [Networked]
+    [Networked]
     UCCInput _receivedCurrentInput { get; set; }
 
     UCCInput _receivedPreviousInput;
@@ -55,7 +55,7 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
     void OnInput(NetworkRunner runner, NetworkInput networkInput)
     {
-        Debug.Log("Dbmarker set input " + _accumulatedInput.horizontalValue + " " + _accumulatedInput.verticalValue);
+        Debug.Log("Dbmarker OnInput by " + (HasInputAuthority ? "local " : "remote ") + "player set input " + _accumulatedInput.horizontalValue + " " + _accumulatedInput.verticalValue);
         networkInput.Set(_accumulatedInput);
 
         _resetAccumulatedInput = true;
@@ -74,26 +74,30 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
         }
         _accumulatedInput.mousePosition = Mouse.current.position.ReadValue();
 
-        _accumulatedInput.SetAxisByName(_horizontalAxisName, GetAxisLocalValue(_horizontalAxisName));
+        float horizontalValue = GetAxisLocalValue(_horizontalAxisName);
+        Debug.Log("Input Asset test " + horizontalValue);
+        _accumulatedInput.SetAxisByName(_horizontalAxisName, horizontalValue);
         _accumulatedInput.SetAxisByName(_verticalAxisName, GetAxisLocalValue(_verticalAxisName));
         _accumulatedInput.SetAxisByName(_mouseXAxisName, GetAxisLocalValue(_mouseXAxisName));
         _accumulatedInput.SetAxisByName(_mouseYAxisName, GetAxisLocalValue(_mouseYAxisName));
         _accumulatedInput.SetAxisByName(_controllerHorizontalLookInputName, GetAxisLocalValue(_controllerHorizontalLookInputName));
         _accumulatedInput.SetAxisByName(_controllerVerticalLookInputName, GetAxisLocalValue(_controllerVerticalLookInputName));
-
+      
+        Debug.Log("Dbmarker collected input " + (HasInputAuthority ? "local " : "remote ") + "player " + _accumulatedInput.horizontalValue + " " + _accumulatedInput.verticalValue);
     }
 
     public override void FixedUpdateNetwork()
     {
-        if ( HasStateAuthority) //   Object.InputAuthority != PlayerRef.None)
-        {
+        //if ( HasStateAuthority) //   Object.InputAuthority != PlayerRef.None)
+        //{
             if (GetInput(out UCCInput input) == true)
             {
                
                 _receivedCurrentInput = input;
-                Debug.Log("Dbmarker received input " + _receivedCurrentInput.horizontalValue + " " + _receivedCurrentInput.verticalValue);
+                
+            Debug.Log("Dbmarker received input " + (HasInputAuthority ? "local " : "remote ") + "player " + _receivedCurrentInput.horizontalValue + " " + _receivedCurrentInput.verticalValue);
             }
-        }
+       // }
 
     }
 

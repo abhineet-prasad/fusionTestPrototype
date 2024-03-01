@@ -9,6 +9,7 @@ using Opsive.UltimateCharacterController.Character;
 using Opsive.Shared.Events;
 using Opsive.UltimateCharacterController.Utility.Builders;
 using TMPro;
+using Opsive.Shared.Character;
 
 public class AtlasFusionBehaviour : NetworkBehaviour
 {
@@ -18,11 +19,10 @@ public class AtlasFusionBehaviour : NetworkBehaviour
 
     public void Awake()
     {
-        
-    }
-    public void Start()
-    {
-     
+        if (gameObject.GetComponent<LocalLookSource>() == null)
+        {
+            gameObject.AddComponent<LocalLookSource>();
+        }
     }
 
     public override void Spawned()
@@ -125,6 +125,14 @@ public class AtlasFusionBehaviour : NetworkBehaviour
         cameraController.ThirdPersonViewTypeFullName = "Opsive.UltimateCharacterController.ThirdPersonController.Camera.ViewTypes.Adventure";
 
         cameraController.SetPerspective(false, true);
+
+        var existingLookSource = character.GetComponent<LocalLookSource>();
+        if(existingLookSource != null)
+        {
+            DestroyImmediate(existingLookSource);
+        }
+
+
         cameraController.Character = character;
 
 

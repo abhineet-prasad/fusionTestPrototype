@@ -75,7 +75,7 @@ namespace Opsive.UltimateCharacterController.Character
         protected GameObject m_GameObject;
         protected Transform m_Transform;
         protected Animator m_Animator;
-        private UltimateCharacterLocomotion m_CharacterLocomotion;
+        protected UltimateCharacterLocomotion m_CharacterLocomotion;
         private CharacterIK m_CharacterIK;
 
         private float m_HorizontalMovement;
@@ -102,7 +102,7 @@ namespace Opsive.UltimateCharacterController.Character
         private bool[] m_DirtyItemStateIndexParameters;
         private bool[] m_DirtyItemSubstateIndexParameters;
         private HashSet<int> m_ItemParameterExists;
-        private bool m_SpeedParameterOverride;
+        protected bool m_SpeedParameterOverride;
 
         public bool AnimatorEnabled { get { return m_Animator != null && m_Animator.enabled; } }
         public float HorizontalMovement { get { return m_HorizontalMovement; } }
@@ -180,6 +180,8 @@ namespace Opsive.UltimateCharacterController.Character
             EventHandler.RegisterEvent<bool>(m_GameObject, "OnCharacterSnapAnimator", SnapAnimator);
             EventHandler.RegisterEvent<GameObject>(m_GameObject, "OnCharacterSwitchModels", OnSwitchModels);
             EventHandler.RegisterEvent<float>(m_GameObject, "OnCharacterChangeTimeScale", OnChangeTimeScale);
+            EventHandler.RegisterEvent(m_GameObject, "OnAnimationParametersUpdate", UpdateAnimatorParameters);
+
             var modelManager = m_CharacterLocomotion.gameObject.GetCachedComponent<ModelManager>();
             if (modelManager == null || modelManager.ActiveModel == gameObject) {
                 m_CharacterLocomotion.OnAnimationUpdate += UpdateAnimatorParameters;
@@ -1093,7 +1095,7 @@ namespace Opsive.UltimateCharacterController.Character
         /// <summary>
         /// Updates the ability and item ability parameters if they are dirty.
         /// </summary>
-        private void UpdateDirtyAbilityAnimatorParameters()
+        protected void UpdateDirtyAbilityAnimatorParameters()
         {
             if (m_DirtyAbilityParameters) {
                 UpdateAbilityAnimatorParameters(true);
@@ -1357,6 +1359,7 @@ namespace Opsive.UltimateCharacterController.Character
             EventHandler.UnregisterEvent<bool>(m_GameObject, "OnCharacterSnapAnimator", SnapAnimator);
             EventHandler.UnregisterEvent<GameObject>(m_GameObject, "OnCharacterSwitchModels", OnSwitchModels);
             EventHandler.UnregisterEvent<float>(m_GameObject, "OnCharacterChangeTimeScale", OnChangeTimeScale);
+            EventHandler.UnregisterEvent(m_GameObject, "OnAnimationParametersUpdate", UpdateAnimatorParameters);
         }
 
         /// <summary>

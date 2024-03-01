@@ -117,5 +117,12 @@ public class FusionUnityInputSystem : UnityInputSystem
         }
     }
 
-   
+
+
+    public override Vector2 GetLookVector(bool smoothed) //being calculated at the client, needs to
+    {
+        Vector2 val = base.GetLookVector(smoothed);
+       
+        return val;
+    }
 }

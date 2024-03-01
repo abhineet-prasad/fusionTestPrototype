@@ -7,13 +7,15 @@ using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using Fusion.Addons.Physics;
 using UnityEngine.InputSystem;
+using Opsive.UltimateCharacterController;
 
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
   
 
-
-    public Fusion.GameMode gameMode;
+    public bool overridePlatform= false;
+    public Fusion.GameMode overrideGameMode;
+    Fusion.GameMode gameMode;
     NetworkRunner _runner;
 
     [SerializeField] NetworkPrefabRef _playerPrefab;
@@ -32,15 +34,19 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             gameMode = Fusion.GameMode.Client;
 #endif
 
-        
-        
+        if (overridePlatform)
+        {
+            gameMode = overrideGameMode;
+        }
+
+        _runner = gameObject.GetComponent<NetworkRunner>();
         StartGame(gameMode);
     }
 
     async void StartGame(Fusion.GameMode mode)
     {
         // Create the Fusion runner and let it know that we will be providing user input
-        _runner = gameObject.AddComponent<NetworkRunner>();
+        
         _runner.ProvideInput = true;
 
         // Create the NetworkSceneInfo from the current scene
@@ -69,7 +75,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         if (runner.IsServer)
         {
             // Create a unique position for the player
-            Vector3 spawnPosition = new Vector3((player.RawEncoded % runner.Config.Simulation.PlayerCount) * 3, 1, 0);
+            Vector3 spawnPosition = new Vector3(UnityEngine.Random.Range(10,20), 1, 0);
             NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
             //NetworkObject networkPlayerObject = runner.Spawn(_atlasPrefab, spawnPosition, Quaternion.identity, player);
             // Keep track of the player avatars for easy access
@@ -88,6 +94,23 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             runner.Despawn(networkObject);
             _spawnedCharacters.Remove(player);
         }
+    }
+
+
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+        //spawn SimulationManager prefab
+       
+
+        //instantiate UCCGamePrefab
+
+     
+
+    }
+
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        //runner.SetIsSimulated(SimulationManager.Instance.GetComponent<NetworkObject>(), true);
     }
 
 
@@ -114,6 +137,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnConnectedToServer(NetworkRunner runner)
     {
         Debug.Log("connected to server " + runner.GetInstanceID());
+        
     }
 
 
@@ -165,16 +189,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     }
 
-    public void OnSceneLoadDone(NetworkRunner runner)
-    {
+   
 
-    }
-
-    public void OnSceneLoadStart(NetworkRunner runner)
-    {
-
-    }
-
+   
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
     {
 

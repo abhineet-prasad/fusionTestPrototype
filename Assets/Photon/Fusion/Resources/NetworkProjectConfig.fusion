@@ -60,7 +60,8 @@
         "Fusion.Unity",
         "Assembly-CSharp",
         "Assembly-CSharp-firstpass",
-        "Fusion.Addons.Physics"
+        "Fusion.Addons.Physics",
+        "Opsive.UltimateCharacterController"
     ],
     "UseSerializableDictionary": true,
     "NullChecksForNetworkedProperties": true,
