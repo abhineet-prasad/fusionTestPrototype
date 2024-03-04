@@ -10,16 +10,14 @@ using UnityEngine.InputSystem;
 
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-    JengaInput inputAsset;
-    
-    public PlayerInput playerInput;
+  
 
 
     public Fusion.GameMode gameMode;
     NetworkRunner _runner;
 
     [SerializeField] NetworkPrefabRef _playerPrefab;
-    [SerializeField] NetworkPrefabRef _atlasPrefab;
+
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
     public Color[] playerColors;
@@ -33,17 +31,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 #else
             gameMode = Fusion.GameMode.Client;
 #endif
-        //if (Application.isBatchMode)
-        //{
-        //    gameMode = GameMode.Server;
-        //}
-        //else
-        //{
-        //    gameMode = GameMode.Client;
-        //}
-        inputAsset = new JengaInput();
-       
-        inputAsset.RoamingModeInput.Enable();
+
+        
         
         StartGame(gameMode);
     }
@@ -87,7 +76,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             _spawnedCharacters.Add(player, networkPlayerObject);
             runner.SetPlayerObject(player, networkPlayerObject);
         }
-        
+
+       
+
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
@@ -102,49 +93,22 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     private bool _mouseButton0;
     private bool _mouseButton1;
-    //void Update()
-    //{
-    //    _mouseButton0 = _mouseButton0 | Input.GetMouseButton(0);
-    //    _mouseButton1 = _mouseButton1 | Input.GetMouseButton(1);
-    //}
 
-    //public void OnInput(NetworkRunner runner, NetworkInput input)
-    //{
-    //    var data = new NetworkInputData();
-
-    //    if (Input.GetKey(KeyCode.W))
-    //        data.direction += Vector3.forward;
-
-    //    if (Input.GetKey(KeyCode.S))
-    //        data.direction += Vector3.back;
-
-    //    if (Input.GetKey(KeyCode.A))
-    //        data.direction += Vector3.left;
-
-    //    if (Input.GetKey(KeyCode.D))
-    //        data.direction += Vector3.right;
-
-    //    data.buttons.Set(NetworkInputData.MOUSEBUTTON0, _mouseButton0);
-    //    _mouseButton0 = false;
-
-    //    data.buttons.Set(NetworkInputData.MOUSEBUTTON1, _mouseButton1);
-    //    _mouseButton1 = false;
-
-    //    input.Set(data);
-    //}
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
+        /*
         var data = new NetworkInputData();
 
         var actionMap = inputAsset.RoamingModeInput;
         //var actionMap = testInputAsset.gameplay;
-        data.direction = new Vector3(actionMap.Horizontal.ReadValue<float>(), 0, actionMap.Vertical.ReadValue<float>());
+        data.moveDirection = new Vector3(actionMap.Horizontal.ReadValue<float>(), 0, actionMap.Vertical.ReadValue<float>());
         data.buttons.Set(NetworkInputData.MOUSEBUTTON0, actionMap.Fire1.IsPressed());
         data.buttons.Set(NetworkInputData.MOUSEBUTTON1, actionMap.Fire2.IsPressed());
        // Debug.Log(data.direction);
 
         input.Set(data);
+        */
     }
 
     public void OnConnectedToServer(NetworkRunner runner)
@@ -178,8 +142,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
 
     }
-
-    
 
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
     {
