@@ -47,7 +47,7 @@ namespace Opsive.Shared.Input
         /// <summary>
         /// Initializes the default values.
         /// </summary>
-        private void Awake()
+        protected virtual void Awake()
         {
             if (m_PlayerInput == null) {
                 m_PlayerInput = GetComponentInChildren<PlayerInput>();
@@ -58,6 +58,7 @@ namespace Opsive.Shared.Input
                     return;
                 }
             }
+            
 
             Transform parent;
             // Move the PlayerInput GameObject to a GameObject that will never be disabled.
@@ -87,7 +88,7 @@ namespace Opsive.Shared.Input
         /// </summary>
         /// <param name="buttonName">The name of the button.</param>
         /// <returns>True of the button is being pressed.</returns>
-        public bool GetButton(string buttonName)
+        public virtual bool GetButton(string buttonName)
         {
             return m_PlayerInput.GetButton(buttonName);
         }
@@ -97,7 +98,7 @@ namespace Opsive.Shared.Input
         /// </summary>
         /// <param name="buttonName">The name of the button.</param>
         /// <returns>True if the button is pressed this frame.</returns>
-        public bool GetButtonDown(string buttonName)
+        public virtual bool GetButtonDown(string buttonName)
         {
             return m_PlayerInput.GetButtonDown(buttonName);
         }
@@ -107,7 +108,7 @@ namespace Opsive.Shared.Input
         /// </summary>
         /// <param name="buttonName">The name of the button.</param>
         /// <returns>True if the button is up.</returns>
-        public bool GetButtonUp(string buttonName)
+        public virtual bool GetButtonUp(string buttonName)
         {
             return m_PlayerInput.GetButtonUp(buttonName);
         }
@@ -117,7 +118,7 @@ namespace Opsive.Shared.Input
         /// </summary>
         /// <param name="buttonName">The button name to check for a double press.</param>
         /// <returns>True if a double press occurred (double click or double tap).</returns>
-        public bool GetDoublePress(string buttonName)
+        public virtual bool GetDoublePress(string buttonName)
         {
             return m_PlayerInput.GetDoublePress(buttonName);
         }
@@ -127,7 +128,7 @@ namespace Opsive.Shared.Input
         /// </summary>
         /// <param name="buttonName">The button name to check for a tap.</param>
         /// <returns>True if a tap occurred.</returns>
-        public bool GetTap(string buttonName)
+        public virtual bool GetTap(string buttonName)
         {
             return m_PlayerInput.GetTap(buttonName);
         }
@@ -139,7 +140,7 @@ namespace Opsive.Shared.Input
         /// <param name="duration">The duration of a long press.</param>
         /// <param name="waitForRelease">Indicates if the long press should occur after the button has been released (true) or after the duration (false).</param>
         /// <returns>True if a long press occurred.</returns>
-        public bool GetLongPress(string buttonName, float duration, bool waitForRelease)
+        public virtual bool GetLongPress(string buttonName, float duration, bool waitForRelease)
         {
             return m_PlayerInput.GetLongPress(buttonName, duration, waitForRelease);
         }
@@ -149,7 +150,7 @@ namespace Opsive.Shared.Input
         /// </summary>
         /// <param name="buttonName">The name of the axis.</param>
         /// <returns>The value of the axis.</returns>
-        public float GetAxis(string buttonName)
+        public virtual float GetAxis(string buttonName)
         {
             return m_PlayerInput.GetAxis(buttonName);
         }
@@ -159,7 +160,7 @@ namespace Opsive.Shared.Input
         /// </summary>
         /// <param name="buttonName">The name of the axis.</param>
         /// <returns>The value of the raw axis.</returns>
-        public float GetAxisRaw(string buttonName)
+        public virtual float GetAxisRaw(string buttonName)
         {
             return m_PlayerInput.GetAxisRaw(buttonName);
         }
@@ -168,7 +169,7 @@ namespace Opsive.Shared.Input
         /// Is a controller connected?
         /// </summary>
         /// <returns>True if a controller is connected.</returns>
-        public bool IsControllerConnected()
+        public virtual bool IsControllerConnected()
         {
             return m_PlayerInput.IsControllerConnected();
         }

@@ -4,6 +4,8 @@
 /// https://www.opsive.com
 /// ---------------------------------------------
 
+using Fusion;
+
 namespace Opsive.UltimateCharacterController
 {
     using Opsive.Shared.Utility;
@@ -18,10 +20,10 @@ namespace Opsive.UltimateCharacterController
     /// <summary>
     /// Manages when the character and cameras should move.
     /// </summary>
-    public class SimulationManager : MonoBehaviour
+    public class SimulationManager : NetworkBehaviour, IAfterTick
     {
         private static SimulationManager s_Instance;
-        protected static SimulationManager Instance
+        public static SimulationManager Instance
         {
             get {
                 if (!s_Initialized) {
@@ -165,7 +167,7 @@ namespace Opsive.UltimateCharacterController
                     m_Handler.GetPositionInput(out horizontalMovement, out forwardMovement);
                     m_Handler.GetRotationInput(horizontalMovement, forwardMovement, out deltaYaw);
                 }
-
+             
                 m_Locomotion.Move(horizontalMovement, forwardMovement, deltaYaw);
                 AssignFixedLocation();
             }
@@ -665,6 +667,7 @@ namespace Opsive.UltimateCharacterController
         /// </summary>
         protected virtual void FixedUpdate()
         {
+            /*
             MoveSmoothedObjects(-1);
             MoveCharacters(true, -1);
             RotateCameras();
@@ -672,6 +675,40 @@ namespace Opsive.UltimateCharacterController
             MoveCameras(-1);
 
             m_FixedTime = Time.time;
+            */
+        }
+
+        public override void Spawned()
+        {
+            base.Spawned();
+            
+            bool success = Runner.SetIsSimulated(GetComponent<NetworkObject>(), true);
+            Debug.Log("spawned Simulation Manager with result " + success);
+        }
+
+        public override void FixedUpdateNetwork()
+        {
+            base.FixedUpdateNetwork();
+            Debug.Log("NMark  FUN Call ");
+            if (HasStateAuthority)
+            {
+                Debug.Log("NMark  called on host FUN");
+                MoveSmoothedObjects(-1);
+                MoveCharacters(true, -1);
+                RotateCameras();
+                MoveCharacters(false, -1);
+                MoveCameras(-1);
+
+                //m_FixedTime = Time.time;
+
+            }
+            else
+            {
+                Debug.Log("NMark  called on client FUN");
+                RotateCameras();
+                MoveCameras(-1);
+            }
+            m_FixedTime = Runner.LocalRenderTime;
         }
 
         /// <summary>
@@ -679,10 +716,34 @@ namespace Opsive.UltimateCharacterController
         /// </summary>
         protected virtual void Update()
         {
+            /*
             var interpAmount = (Time.time - m_FixedTime) / Time.fixedDeltaTime;
             MoveSmoothedObjects(interpAmount);
             MoveCharacters(false, interpAmount);
             MoveCameras(interpAmount);
+            */
+        }
+
+        public override void Render()
+        {
+            Debug.Log("NMark IsInSimulation " + GetComponent<NetworkObject>().IsInSimulation);
+            var interpAmount = (Runner.LocalRenderTime - m_FixedTime) / Runner.DeltaTime;
+            if (HasStateAuthority)
+            {
+                //var interpAmount = (Time.time - m_FixedTime) / Time.fixedDeltaTime;
+                Debug.Log("NMark  called on host R ");
+                MoveSmoothedObjects(interpAmount);
+                MoveCharacters(false, interpAmount);
+                MoveCameras(interpAmount);
+            }
+            else
+            {
+                Debug.Log("NMark  called on client R");
+                MoveCameras(interpAmount);
+            }
+        }
+
+        public void AfterTick() {
         }
 
         /// <summary>

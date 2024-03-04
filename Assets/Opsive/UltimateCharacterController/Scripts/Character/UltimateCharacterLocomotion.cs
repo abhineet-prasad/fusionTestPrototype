@@ -206,7 +206,7 @@ namespace Opsive.UltimateCharacterController.Character
         public UnityFloatEvent OnChangeTimeScaleEvent { get { return m_OnChangeTimeScaleEvent; } set { m_OnChangeTimeScaleEvent = value; } }
         public UnityTransformEvent OnChangeMovingPlatformsEvent { get { return m_OnChangeMovingPlatformsEvent; } set { m_OnChangeMovingPlatformsEvent = value; } }
 
-        [System.NonSerialized] private GameObject m_GameObject;
+        [System.NonSerialized] protected GameObject m_GameObject;
 #if ULTIMATE_CHARACTER_CONTROLLER_MULTIPLAYER
         private INetworkInfo m_NetworkInfo;
         private INetworkCharacter m_NetworkCharacter;
@@ -214,23 +214,23 @@ namespace Opsive.UltimateCharacterController.Character
         [Shared.Utility.NonSerialized] public bool IsPassiveReconciliation { get { return m_IsPassiveReconciliation; } set { m_IsPassiveReconciliation = value; } }
 #endif
 
-        private MovementType m_ActiveMovementType;
+        protected MovementType m_ActiveMovementType;
         private Dictionary<string, int> m_MovementTypeNameMap = new Dictionary<string, int>();
         private bool m_FirstPersonPerspective;
         private ILookSource m_LookSource;
 
-        private Ability[] m_ActiveAbilities;
-        private int m_ActiveAbilityCount;
-        private ItemAbility[] m_ActiveItemAbilities;
-        private int m_ActiveItemAbilityCount;
-        private Effect[] m_ActiveEffects;
-        private int m_ActiveEffectsCount;
+        protected Ability[] m_ActiveAbilities;
+        protected int m_ActiveAbilityCount;
+        protected ItemAbility[] m_ActiveItemAbilities;
+        protected int m_ActiveItemAbilityCount;
+        protected Effect[] m_ActiveEffects;
+        protected int m_ActiveEffectsCount;
 
         private MoveTowards m_MoveTowardsAbility;
         private ItemEquipVerifier m_ItemEquipVerifierAbility;
 
         private Vector2 m_RawInputVector;
-        private bool m_Moving;
+        protected bool m_Moving;
         private float m_MaxHeight;
         private Vector3 m_MaxHeightPosition;
         private bool m_Alive;
@@ -250,7 +250,7 @@ namespace Opsive.UltimateCharacterController.Character
 
         public MoveTowards MoveTowardsAbility { get { return m_MoveTowardsAbility; } }
         public ItemEquipVerifier ItemEquipVerifierAbility { get { return m_ItemEquipVerifierAbility; } }
-        public Vector2 RawInputVector { get => m_RawInputVector; set => m_RawInputVector = value; }
+        public virtual Vector2 RawInputVector { get => m_RawInputVector; set => m_RawInputVector = value; }
         public override float TimeScale
         {
             get { return base.TimeScale; }
@@ -271,9 +271,9 @@ namespace Opsive.UltimateCharacterController.Character
             }
         }
         [Shared.Utility.NonSerialized]
-        public bool Moving
+        public virtual bool Moving
         {
-            get { return m_Moving || m_RawInputVector.sqrMagnitude > 0.001f || m_InputVector.sqrMagnitude > 0.001f; }
+            get { return m_Moving || m_RawInputVector.sqrMagnitude > 0.001f || InputVector.sqrMagnitude > 0.001f; }
             set
             {
                 if (m_Moving != value) {
@@ -560,16 +560,16 @@ namespace Opsive.UltimateCharacterController.Character
         protected override void UpdateCharacter()
         {
             // The MovementType may change the InputVector.
-            m_RawInputVector = m_InputVector;
+            m_RawInputVector = InputVector;
 
             // Abilities may disallow input.
             bool allowPositionalInput, allowRotationalInput;
             AbilitiesAllowInput(out allowPositionalInput, out allowRotationalInput);
             if (allowPositionalInput) {
                 // Positional input is allowed - use the movement type to determine how the character should move.
-                m_InputVector = m_ActiveMovementType.GetInputVector(m_InputVector);
+                InputVector = m_ActiveMovementType.GetInputVector(InputVector);
             } else {
-                m_InputVector = Vector2.zero;
+                InputVector = Vector2.zero;
             }
             if (!allowRotationalInput) {
                 m_DeltaRotation = Vector3.zero;
@@ -584,7 +584,7 @@ namespace Opsive.UltimateCharacterController.Character
                 m_ActiveEffects[i].Update();
             }
 
-            if (m_Moving != (m_InputVector.sqrMagnitude > 0.001f)) {
+            if (m_Moving != (InputVector.sqrMagnitude > 0.001f)) {
                 Moving = !m_Moving;
             }
 
@@ -1822,7 +1822,7 @@ namespace Opsive.UltimateCharacterController.Character
             StopAllAbilities(true);
 
             // The animator values should reset.
-            m_InputVector = Vector3.zero;
+            InputVector = Vector3.zero;
             Moving = false;
         }
 
