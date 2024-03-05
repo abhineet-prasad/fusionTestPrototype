@@ -63,8 +63,14 @@ public class FusionUnityInputSystem : UnityInputSystem
     /// <returns>The value of the axis.</returns>
     protected override float GetAxisInternal(string name)
     {
-
-        return _networkInput.CurrentInput.GetAxisByName(name);
+        if (_networkInput.Runner.IsServer)
+        {
+            return _networkInput.CurrentInput.GetAxisByName(name);
+        }
+        else
+        {
+            return _networkInput.ClientInput.GetAxisByName(name);
+        }
     }
 
     /// <summary>
@@ -83,7 +89,14 @@ public class FusionUnityInputSystem : UnityInputSystem
     /// <returns>The mouse position.</returns>
     public override Vector2 GetMousePosition()
     {
-        return _networkInput.CurrentInput.mousePosition;
+        if (_networkInput.Runner.IsServer)
+        {
+            return _networkInput.CurrentInput.mousePosition;
+        }
+        else
+        {
+            return _networkInput.ClientInput.mousePosition;
+        }
     }
 
 

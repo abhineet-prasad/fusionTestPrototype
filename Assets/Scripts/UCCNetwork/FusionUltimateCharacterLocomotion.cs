@@ -85,6 +85,12 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
 
     protected override void UpdatePosition()
     {
+        if (runner.IsClient)
+        {
+            base.UpdatePosition();
+            return;
+        }
+
         var frictionValue = 1f;
         // The collider may be destroyed before the grounded check runs again.
         if (m_Grounded && m_GroundedRaycastHit.collider != null)
@@ -135,6 +141,12 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
 
     protected override void UpdateDesiredMovement()
     {
+        if (runner.IsClient)
+        {
+            base.UpdateDesiredMovement();
+            return;
+        }
+
         //m_DesiredMovement += (m_MotorThrottle + m_ExternalForce) * Time.deltaTime;
         m_DesiredMovement += (m_MotorThrottle + m_ExternalForce) * runner.DeltaTime;
 
@@ -157,6 +169,13 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
 
     protected override void DetectGroundCollision(bool sendGroundedEvents = true)
     {
+        if (runner.IsClient)
+        {
+            base.DetectGroundCollision(sendGroundedEvents);
+            return;
+        }
+
+
         if (!UsingGroundCollisionDetection)
         {
             return;
@@ -332,6 +351,11 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
 
     protected override void ApplyPosition()
     {
+        if (runner.IsClient)
+        {
+            base.ApplyPosition();
+            return;
+        }
         //m_Velocity = (m_DesiredMovement - m_MovingPlatformMovement) / Time.deltaTime;
         m_Velocity = (m_DesiredMovement - m_MovingPlatformMovement) / runner.DeltaTime;
         m_Position += m_DesiredMovement;

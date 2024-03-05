@@ -25,17 +25,24 @@ public class AtlasFusionBehaviour : NetworkBehaviour
         }
     }
 
+    public bool IsLocalPlayer => _isLocalPlayer;
+    private bool _isLocalPlayer;
+
     public override void Spawned()
     {
         base.Spawned();
         if (HasInputAuthority)
         {
+            _isLocalPlayer = true;
             playerLabel.text = "Local";
             playerLabel.color = Color.cyan;
             InitializeLocalPlayer();
+            var simNetOb = SimulationManager.Instance.GetComponent<NetworkObject>();
+            simNetOb.AssignInputAuthority(Runner.LocalPlayer);
         }
         else
         {
+            _isLocalPlayer = false;
             playerLabel.text = "Remote";
             playerLabel.color = Color.red;
             InitializeRemotePlayer();
