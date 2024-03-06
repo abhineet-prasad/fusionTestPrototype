@@ -25,6 +25,8 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
     protected UnityEngine.InputSystem.PlayerInput m_PlayerInput;
     protected Dictionary<InputActionMap, Dictionary<string, InputAction>> m_InputActionByName = new Dictionary<InputActionMap, Dictionary<string, InputAction>>();
 
+    private FusionUnityInputSystem _fusionUnityInputSystem;
+
     [Networked]
     UCCInput _receivedCurrentInput { get; set; }
 
@@ -48,6 +50,8 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
             m_PlayerInput = FindObjectOfType<Opsive.Shared.Game.SchedulerBase>().GetComponentInChildren<UnityEngine.InputSystem.PlayerInput>();
             m_PlayerInput.enabled = true;
+            _fusionUnityInputSystem = m_PlayerInput.GetComponent<FusionUnityInputSystem>();
+
         }
 
         
@@ -55,11 +59,13 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
     void OnInput(NetworkRunner runner, NetworkInput networkInput)
     {
-        Debug.Log("Dbmarker OnInput by " + (HasInputAuthority ? "local " : "remote ") + "player set input " + _localClientInput.horizontalValue + " " + _localClientInput.verticalValue);
+        //Debug.Log("Dbmarker OnInput by " + (HasInputAuthority ? "local " : "remote ") + "player set input " + _localClientInput.horizontalValue + " " + _localClientInput.verticalValue);
         networkInput.Set(_localClientInput);
 
         _resetAccumulatedInput = true;
     }
+
+
 
     public void BeforeUpdate()
     {
@@ -82,8 +88,10 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
         _localClientInput.SetAxisByName(_mouseYAxisName, GetAxisLocalValue(_mouseYAxisName));
         _localClientInput.SetAxisByName(_controllerHorizontalLookInputName, GetAxisLocalValue(_controllerHorizontalLookInputName));
         _localClientInput.SetAxisByName(_controllerVerticalLookInputName, GetAxisLocalValue(_controllerVerticalLookInputName));
-      
-        Debug.Log("Dbmarker collected input " + (HasInputAuthority ? "local " : "remote ") + "player " + _localClientInput.horizontalValue + " " + _localClientInput.verticalValue);
+        _localClientInput.rawLookVector = _fusionUnityInputSystem.GetLocalLookVector(false);
+        _localClientInput.currentLookVector = _fusionUnityInputSystem.GetLocalLookVector(true);
+
+        Debug.Log("LocInp BU " + (HasInputAuthority ? "local " : "remote ") + "player " + _localClientInput.horizontalValue + " " + _localClientInput.verticalValue);
     }
 
     public override void FixedUpdateNetwork()
@@ -95,7 +103,7 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
                
                 _receivedCurrentInput = input;
                 
-            Debug.Log("Dbmarker received input " + (HasInputAuthority ? "local " : "remote ") + "player " + _receivedCurrentInput.horizontalValue + " " + _receivedCurrentInput.verticalValue);
+            //Debug.Log("Dbmarker received input " + (HasInputAuthority ? "local " : "remote ") + "player " + _receivedCurrentInput.horizontalValue + " " + _receivedCurrentInput.verticalValue);
             }
        // }
 

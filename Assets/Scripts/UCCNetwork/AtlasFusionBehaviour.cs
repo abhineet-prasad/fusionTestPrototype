@@ -10,6 +10,7 @@ using Opsive.Shared.Events;
 using Opsive.UltimateCharacterController.Utility.Builders;
 using TMPro;
 using Opsive.Shared.Character;
+using Opsive.Shared.StateSystem;
 
 public class AtlasFusionBehaviour : NetworkBehaviour
 {
@@ -23,14 +24,27 @@ public class AtlasFusionBehaviour : NetworkBehaviour
         {
             gameObject.AddComponent<LocalLookSource>();
         }
+        m_CharacterLocomotion = GetComponent<FusionUltimateCharacterLocomotion>();
     }
 
     public bool IsLocalPlayer => _isLocalPlayer;
     private bool _isLocalPlayer;
 
+    [Networked]
+    public Vector3 ServerPosition { get; set; }
+
+    [Networked]
+    public Quaternion ServerRotation { get; set; }
+
+
+    private ChangeDetector _changeDetector;
+
+
     public override void Spawned()
     {
         base.Spawned();
+        _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
+
         if (HasInputAuthority)
         {
             _isLocalPlayer = true;
@@ -148,5 +162,36 @@ public class AtlasFusionBehaviour : NetworkBehaviour
             EventHandler.ExecuteEvent(character, "OnCharacterSnapAnimator", true);
         }
     }
-    
+
+
+    public override void FixedUpdateNetwork()
+    {
+        base.FixedUpdateNetwork();
+        if (HasStateAuthority)
+        {
+
+        }
+    }
+
+    public override void Render()
+    {
+
+        foreach (var change in _changeDetector.DetectChanges(this))
+        {
+            switch (change)
+            {
+                case nameof(ServerPosition):
+                    {
+                        m_CharacterLocomotion.ServerPosition = ServerPosition ;
+                    }
+                    break;
+                case nameof(ServerRotation):
+                    {
+                        m_CharacterLocomotion.ServerRotation = ServerRotation;
+                    }
+                    break;
+            }
+        }
+    }
+
 }

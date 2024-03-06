@@ -7,23 +7,36 @@ using Opsive.UltimateCharacterController.Utility;
 using Opsive.UltimateCharacterController.Game;
 using Opsive.Shared.Events;
 using Opsive.Shared.StateSystem;
+using static UnityEditor.FilePathAttribute;
 
 public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
 {
 
     NetworkRunner runner;
     FusionUltimateCharacterNetworkBehaviour _networkedCharacter;
+    AtlasFusionBehaviour _atlasFusionBehaviour;
+
 
     bool test = true;
 
     public override Vector2 InputVector
     {
-        get { return (_networkedCharacter.HasSpawned && test) ? _networkedCharacter.InputVector : base.InputVector; }
+        get {
+            if (_networkedCharacter.HasSpawned)
+            {
+                return _atlasFusionBehaviour.IsLocalPlayer ? base.InputVector :_networkedCharacter.InputVector;
+            }
+            else
+            {
+                return base.InputVector;
+            }
+            
+        }
 
         set {
             base.InputVector = value;
-            if (runner.IsServer)
-            { 
+            if (runner.IsServer && _networkedCharacter.HasSpawned)
+            {
                 _networkedCharacter.InputVector = value;
             }
         }
@@ -31,17 +44,50 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
 
     public override Vector2 RawInputVector
     {
-        get { return (_networkedCharacter.HasSpawned && test) ? _networkedCharacter.RawInputVector : base.RawInputVector; }
+        get {
+            if (_networkedCharacter.HasSpawned)
+            {
+                return _atlasFusionBehaviour.IsLocalPlayer ? base.RawInputVector : _networkedCharacter.RawInputVector;
+            }
+            else
+            {
+                return base.RawInputVector;
+            }
+        }
         set
         {
             base.RawInputVector = value;
-            if (runner.IsServer)
+            if (runner.IsServer && _networkedCharacter.HasSpawned)
             {
                 _networkedCharacter.RawInputVector = value;
             }
         }
     }
 
+
+    public override bool Moving
+    {
+        get
+        {
+            if (_networkedCharacter.HasSpawned)
+            {
+                return _atlasFusionBehaviour.IsLocalPlayer ? base.Moving : _networkedCharacter.Moving;
+            }
+            else
+            {
+                return base.Moving;
+            }
+        }
+        set
+        {
+
+             base.Moving = value;
+            if (runner.IsServer && _networkedCharacter.HasSpawned)
+            {
+                _networkedCharacter.Moving = value;
+            }
+        }
+    }
 
 
     protected override void UpdateCharacter()
@@ -56,31 +102,26 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
     }
 
 
-
-
-    public override bool Moving
-    {
-        get { return _networkedCharacter.HasSpawned ? _networkedCharacter.Moving : base.Moving;  }
-        set
-        {
-            if (m_Moving != value)
-            {
-                m_Moving = value;
-                if (runner.IsServer)
-                {
-                    _networkedCharacter.Moving = value;
-                }
-            }
-        }
-    }
-
-
     protected override void AwakeInternal()
     {
         runner = FindObjectOfType<NetworkRunner>();
         _networkedCharacter = GetComponent<FusionUltimateCharacterNetworkBehaviour>();
+        _atlasFusionBehaviour = GetComponent<AtlasFusionBehaviour>();
         base.AwakeInternal();
 
+    }
+
+    protected override void UpdateRotation()
+    {
+        base.UpdateRotation();
+
+        if (runner.IsClient)
+        {
+            //var targetRotation = Quaternion.Slerp(m_Transform.rotation, ServerRotation, this.MotorRotationSpeed * Time.deltaTime);
+            //this.DesiredRotation = MathUtility.InverseTransformQuaternion(m_Transform.rotation, targetRotation);
+            Quaternion deltaRotation = Quaternion.Inverse(m_Transform.rotation) * ServerRotation;
+            DesiredRotation *= deltaRotation;
+        }
     }
 
     protected override void UpdatePosition()
@@ -139,11 +180,31 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
         }
     }
 
+
+    bool syncPlayerToServer = false;
     protected override void UpdateDesiredMovement()
     {
         if (runner.IsClient)
         {
             base.UpdateDesiredMovement();
+            float syncSpeed = 6.0f;
+            var disp = ServerPosition - (transform.position+ m_DesiredMovement);
+
+            var correctionThreshold = 10.0f;
+            if (disp.sqrMagnitude > correctionThreshold)
+            {
+                Debug.Log("SS server sync activated");
+                syncPlayerToServer = true;
+            }
+            if (syncPlayerToServer)
+            {
+                m_DesiredMovement += (ServerPosition - transform.position).normalized * syncSpeed * Time.deltaTime;
+                if(disp.sqrMagnitude < 0.1f)
+                {
+                    syncPlayerToServer = false;
+                    Debug.Log("SS server sync complete");
+                }
+            }
             return;
         }
 
@@ -378,5 +439,15 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
 
         m_LastDesiredMovement = m_DesiredMovement;
         m_DesiredMovement = m_RootMotionDeltaPosition = Vector3.zero;
+    }
+
+    public override void SetServerPosition(Vector3 position)
+    {
+        _atlasFusionBehaviour.ServerPosition = position;
+    }
+
+    public override void SetServerRotation(Quaternion rotation)
+    {
+        _atlasFusionBehaviour.ServerRotation = rotation;
     }
 }

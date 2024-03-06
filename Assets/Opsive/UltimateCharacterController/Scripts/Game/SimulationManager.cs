@@ -689,12 +689,12 @@ namespace Opsive.UltimateCharacterController
           //  bool success = Runner.SetIsSimulated(GetComponent<NetworkObject>(), true);
             //Debug.Log("spawned Simulation Manager with result " + success);
         }
-
+        bool enableFUN = true;
         public override void FixedUpdateNetwork()
         {
             base.FixedUpdateNetwork();
             
-            if (HasStateAuthority)
+            if (HasStateAuthority && enableFUN)
             {
                 Debug.Log("NMark  called on host FUN");
                 MoveSmoothedObjects(-1);
@@ -729,7 +729,7 @@ namespace Opsive.UltimateCharacterController
         {
             Debug.Log("NMark IsInSimulation " + GetComponent<NetworkObject>().IsInSimulation);
             var interpAmount = (Runner.LocalRenderTime - m_FixedTime) / Runner.DeltaTime;
-            if (HasStateAuthority)
+            if (HasStateAuthority && enableFUN)
             {
                 //var interpAmount = (Time.time - m_FixedTime) / Time.fixedDeltaTime;
                 Debug.Log("NMark  called on host R ");
@@ -740,9 +740,24 @@ namespace Opsive.UltimateCharacterController
 
         }
 
-        public void AfterTick() {
+        public void AfterTick()
+        {
+            if (HasStateAuthority)
+            {
+                SynchronizeCharacters();
+            }
         }
 
+        void SynchronizeCharacters()
+        {
+            for (int i = 0; i < m_Characters.Count; ++i)
+            {
+                m_Characters[i].Locomotion.SetServerPosition(m_Characters[i].Locomotion.TargetPosition);
+                m_Characters[i].Locomotion.SetServerRotation(m_Characters[i].Locomotion.TargetRotation);
+            }
+        }
+
+        
         /// <summary>
         /// Moves the smoothed objects.
         /// </summary>

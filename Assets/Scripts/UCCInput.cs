@@ -15,6 +15,8 @@ public struct UCCInput : INetworkInput
     public float controllerYValue;
 
     public Vector2 mousePosition;
+    public Vector2 rawLookVector;
+    public Vector2 currentLookVector;
 
     public NetworkButtons networkButtons;
     public const int JUMP_BUTTON = 0;

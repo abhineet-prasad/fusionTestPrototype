@@ -368,7 +368,6 @@ GameObject:
   - component: {fileID: 6678264764448036545}
   - component: {fileID: 339944328027850775}
   - component: {fileID: 3998533142981291057}
-  - component: {fileID: 3108862655931951303}
   - component: {fileID: 8687321471247907180}
   m_Layer: 31
   m_Name: AtlasNet
@@ -1692,7 +1691,6 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 6678264764448036545}
   - {fileID: 339944328027850775}
-  - {fileID: 3108862655931951303}
   - {fileID: 8687321471247907180}
 --- !u!114 &2765632045861736257
 MonoBehaviour:
@@ -1726,6 +1724,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerLabel: {fileID: 8049500996743115311}
+  _DesiredPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &339944328027850775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1751,22 +1750,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_PlayerInput: {fileID: 2666865520093614960}
---- !u!114 &3108862655931951303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4389687500541639179}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
 --- !u!114 &8687321471247907180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1781,6 +1764,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _Moving: 0
   _InputVector: {x: 0, y: 0}
+  _RawInputVector: {x: 0, y: 0}
+  _UpdateAnimationParameters: 0
 --- !u!1 &5949087914005232615
 GameObject:
   m_ObjectHideFlags: 0
