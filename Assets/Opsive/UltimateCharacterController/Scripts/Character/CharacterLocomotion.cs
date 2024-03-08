@@ -263,10 +263,15 @@ namespace Opsive.UltimateCharacterController.Character
         private Transform m_RigidbodyParent;
         private bool m_Interpolate = true;
 
+        private Vector3 m_ServerPosition;
+        private Quaternion m_ServerRotation;
+
         [Shared.Utility.NonSerialized] public virtual Vector2 InputVector { get { return m_InputVector; } set { m_InputVector = value; } }
         [Shared.Utility.NonSerialized] public Vector3 DeltaRotation { get { return m_DeltaRotation; } set { m_DeltaRotation = value; } }
         [Shared.Utility.NonSerialized] public Quaternion DesiredRotation { get { return m_DesiredRotation; } set { m_DesiredRotation = value; } }
         [Shared.Utility.NonSerialized] public Vector3 DesiredMovement { get { return m_DesiredMovement; } set { m_DesiredMovement = value; } }
+        [Shared.Utility.NonSerialized] public Vector3 ServerPosition { get { return m_ServerPosition; } set { m_ServerPosition = value; } }
+        [Shared.Utility.NonSerialized] public Quaternion ServerRotation { get { return m_ServerRotation; } set { m_ServerRotation = value; } }
         public Vector3 LastDesiredMovement => m_LastDesiredMovement;
         public Quaternion LastDesiredRotation => m_LastDesiredRotation;
         public float Height => m_Height;
@@ -2076,6 +2081,16 @@ namespace Opsive.UltimateCharacterController.Character
         protected virtual void OnDisable()
         {
             SimulationManager.UnregisterCharacter(m_SimulationIndex);
+        }
+
+        public virtual void SetServerPosition(Vector3 position)
+        {
+
+        }
+
+        public virtual void SetServerRotation(Quaternion rotation)
+        {
+
         }
     }
 }

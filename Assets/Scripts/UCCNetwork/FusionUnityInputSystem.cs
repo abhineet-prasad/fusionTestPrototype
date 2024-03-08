@@ -63,8 +63,15 @@ public class FusionUnityInputSystem : UnityInputSystem
     /// <returns>The value of the axis.</returns>
     protected override float GetAxisInternal(string name)
     {
-
-        return _networkInput.CurrentInput.GetAxisByName(name);
+        if (_networkInput.Runner.IsServer)
+        {
+            return _networkInput.CurrentInput.GetAxisByName(name);
+        }
+        else
+        {
+            //Debug.Log("LocInp "+ name+" " + _networkInput.ClientInput.GetAxisByName(name));
+            return _networkInput.ClientInput.GetAxisByName(name);
+        }
     }
 
     /// <summary>
@@ -83,7 +90,14 @@ public class FusionUnityInputSystem : UnityInputSystem
     /// <returns>The mouse position.</returns>
     public override Vector2 GetMousePosition()
     {
-        return _networkInput.CurrentInput.mousePosition;
+        if (_networkInput.Runner.IsServer)
+        {
+            return _networkInput.CurrentInput.mousePosition;
+        }
+        else
+        {
+            return _networkInput.ClientInput.mousePosition;
+        }
     }
 
 
@@ -121,8 +135,26 @@ public class FusionUnityInputSystem : UnityInputSystem
 
     public override Vector2 GetLookVector(bool smoothed) //being calculated at the client, needs to
     {
-        Vector2 val = base.GetLookVector(smoothed);
-       
-        return val;
+       // return base.GetLookVector(smoothed);
+
+        if (_networkInput.Runner.IsServer)
+        {
+            
+            var val = smoothed ? _networkInput.CurrentInput.currentLookVector : _networkInput.CurrentInput.rawLookVector;
+            //Debug.Log("ORT server Look vector " + val);
+            return val;
+        }
+        else
+        {
+            var val = base.GetLookVector(smoothed);
+            //Debug.Log("ORT client Look vector " + val);
+            return base.GetLookVector(smoothed);
+        }
+
+    }
+
+    public Vector2 GetLocalLookVector(bool smoothed)
+    {
+        return base.GetLookVector(smoothed);
     }
 }

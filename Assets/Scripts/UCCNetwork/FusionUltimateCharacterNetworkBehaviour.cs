@@ -10,6 +10,7 @@ public class FusionUltimateCharacterNetworkBehaviour : NetworkBehaviour
 {
     GameObject m_GameObject;
     FusionUltimateCharacterLocomotion _characterLocomotion;
+    AtlasFusionBehaviour _atlasFusionBehaviour;
 
     [Networked]
     public bool Moving { get; set; }
@@ -29,6 +30,12 @@ public class FusionUltimateCharacterNetworkBehaviour : NetworkBehaviour
     private bool _hasSpawned = false;
     public bool HasSpawned => _hasSpawned;
 
+    public void Awake()
+    {
+
+        _atlasFusionBehaviour = GetComponent<AtlasFusionBehaviour>();
+    }
+
     public override void Spawned()
     {
         _hasSpawned = true;
@@ -47,10 +54,13 @@ public class FusionUltimateCharacterNetworkBehaviour : NetworkBehaviour
                 case nameof(Moving):
                     {
                         //_characterLocomotion.Moving = Moving;
-                        EventHandler.ExecuteEvent(m_GameObject, "OnCharacterMoving", Moving);
-                        if (!string.IsNullOrEmpty(_characterLocomotion.MovingStateName))
+                        if (IsProxy)
                         {
-                            StateManager.SetState(m_GameObject, _characterLocomotion.MovingStateName, Moving);
+                            EventHandler.ExecuteEvent(m_GameObject, "OnCharacterMoving", Moving);
+                            if (!string.IsNullOrEmpty(_characterLocomotion.MovingStateName))
+                            {
+                                StateManager.SetState(m_GameObject, _characterLocomotion.MovingStateName, Moving);
+                            }
                         }
                     }
 
@@ -58,7 +68,7 @@ public class FusionUltimateCharacterNetworkBehaviour : NetworkBehaviour
 
                 case nameof(UpdateAnimationParameters):
                     {
-                        if (!HasStateAuthority) //this is being called directly on the server, no need to use an event 
+                        if (IsProxy) //this is being called directly on the server, no need to use an event 
                         {
                             EventHandler.ExecuteEvent(m_GameObject, "OnAnimationParametersUpdate");
                         }

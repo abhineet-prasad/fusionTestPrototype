@@ -17,13 +17,6 @@ using Opsive.UltimateCharacterController.Character.Abilities;
 public class AtlasNetworkCharacter : NetworkBehaviour, INetworkCharacter
 {
 
-    public override void Spawned()
-    {
-        base.Spawned();
-        var lookSource = gameObject.AddComponent<LocalLookSource>();
-        EventHandler.ExecuteEvent<ILookSource>(gameObject, "OnCharacterAttachLookSource", lookSource);
-        
-    }
 
 
     #region unusedCallbacks
@@ -160,31 +153,23 @@ public class AtlasNetworkCharacter : NetworkBehaviour, INetworkCharacter
 
     #endregion
 
-    UltimateCharacterLocomotion _characterLocomotion;
-    MoveTowards _moveTowards;
-
+    AtlasFusionBehaviour _atlasFusionBehaviour;
     void Awake()
     {
-        _characterLocomotion = GetComponent<UltimateCharacterLocomotion>();
-        _moveTowards = _characterLocomotion.GetAbility<MoveTowards>();
-    }
-
-    public Vector3 targetLocation;
-
-    void Start()
-    {
-        
+        _atlasFusionBehaviour = GetComponent<AtlasFusionBehaviour>();
+       
     }
 
     public void SetPosition(Vector3 position, bool snapAnimator)
     {
-        transform.position = position;
+        _atlasFusionBehaviour.ServerPosition = position;
+        
     }
 
     public void SetPositionAndRotation(Vector3 position, Quaternion rotation, bool snapAnimator, bool stopAllAbilities)
     {
-        transform.SetPositionAndRotation(position, rotation);
-        //_characterLocomotion.DesiredMovement = position ;
+        _atlasFusionBehaviour.ServerPosition = position;
+        
     }
 
     public void SetRotation(Quaternion rotation, bool snapAnimator)
@@ -192,36 +177,5 @@ public class AtlasNetworkCharacter : NetworkBehaviour, INetworkCharacter
         transform.rotation = rotation;
     }
 
-
-    Vector3 _targetPosition;
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            //_characterLocomotion.MoveTowardsAbility.MoveTowardsLocation(targetLocation);
-            _characterLocomotion.MoveTowardsAbility.MoveTowardsLocation(transform.position + Vector3.forward * 10 * Runner.DeltaTime);
-        }
-    }
-
-
-    public override void FixedUpdateNetwork()
-    {
-        base.FixedUpdateNetwork();
-        if (GetInput(out NetworkInputData data))
-        {
-            data.direction.Normalize();
-
-         //   _characterLocomotion.MoveTowardsAbility.MoveTowardsLocation(transform.position + data.direction * 10 * Runner.DeltaTime);
-
-
-            //_characterLocomotion.DesiredMovement = data.direction * 10 * Runner.DeltaTime;
-            //_characterLocomotion.SetPositionAndRotation(transform.position + data.direction * 10 * Runner.DeltaTime, transform.rotation);
-            //_characterLocomotion.DesiredMovement = Vector3.forward * 1 * Runner.DeltaTime;
-
-            //_characterLocomotion.DesiredMovement = data.direction * 10 * Time.deltaTime;
-
-        }
-    }
 
 }

@@ -6,6 +6,7 @@
 
 namespace Opsive.UltimateCharacterController.Character
 {
+    using Fusion;
     using Opsive.Shared.Events;
     using Opsive.Shared.Game;
     using Opsive.Shared.Input;
@@ -60,11 +61,16 @@ namespace Opsive.UltimateCharacterController.Character
         {
             if (!enabled) {
                 deltaYawRotation = 0;
+                Debug.Log("deltaYaw is disabled " + GetComponent<NetworkObject>().Id);
                 return;
             }
-
+            
             var lookVector = m_PlayerInput.GetLookVector(true);
+
+          
+
             deltaYawRotation = m_CharacterLocomotion.ActiveMovementType.GetDeltaYawRotation(horizontalMovement, forwardMovement, lookVector.x, lookVector.y);
+            //Debug.Log("deltaYaw for " + GetComponent<NetworkObject>().Id + " " + horizontalMovement + "," + forwardMovement + "," + lookVector + " " + deltaYawRotation);
         }
 
         /// <summary>

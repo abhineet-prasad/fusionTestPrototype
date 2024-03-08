@@ -37,13 +37,13 @@
         "EnableEncryption": false
     },
     "NetworkConditions": {
-        "Enabled": false,
+        "Enabled": true,
         "DelayShape": 0,
-        "DelayMin": 0.15,
-        "DelayMax": 0.15,
+        "DelayMin": 0.15000000596046449,
+        "DelayMax": 0.15000000596046449,
         "DelayPeriod": 0.0,
         "DelayThreshold": 0.0,
-        "AdditionalJitter": 0.05,
+        "AdditionalJitter": 0.05000000074505806,
         "LossChanceShape": 0,
         "LossChanceMin": 0.05,
         "LossChanceMax": 0.05,

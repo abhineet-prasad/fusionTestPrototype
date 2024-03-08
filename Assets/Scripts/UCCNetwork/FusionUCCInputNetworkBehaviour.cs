@@ -5,6 +5,7 @@ using Fusion;
 using Opsive.Shared.Input;
 using UnityEngine.InputSystem;
 using Opsive.Shared.Game;
+using Opsive.UltimateCharacterController.Character;
 
 public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 {
@@ -19,12 +20,14 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
     public UCCInput CurrentInput => _receivedCurrentInput;
     public UCCInput PreviousInput => _receivedPreviousInput;
-
+    public UCCInput ClientInput => _accumulatedInput;
 
   
     protected UnityEngine.InputSystem.PlayerInput m_PlayerInput;
     protected Dictionary<InputActionMap, Dictionary<string, InputAction>> m_InputActionByName = new Dictionary<InputActionMap, Dictionary<string, InputAction>>();
 
+    private FusionUnityInputSystem _fusionUnityInputSystem;
+    private UltimateCharacterLocomotion _characterLocomotion;
     [Networked]
     UCCInput _receivedCurrentInput { get; set; }
 
@@ -32,6 +35,11 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
     UCCInput _accumulatedInput;
     bool _resetAccumulatedInput = false;
 
+
+    void Awake()
+    {
+        _characterLocomotion = GetComponent<UltimateCharacterLocomotion>();
+    }
 
     public override void Spawned()
     {
@@ -48,6 +56,8 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
             m_PlayerInput = FindObjectOfType<Opsive.Shared.Game.SchedulerBase>().GetComponentInChildren<UnityEngine.InputSystem.PlayerInput>();
             m_PlayerInput.enabled = true;
+            _fusionUnityInputSystem = m_PlayerInput.GetComponent<FusionUnityInputSystem>();
+
         }
 
         
@@ -55,11 +65,13 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
     void OnInput(NetworkRunner runner, NetworkInput networkInput)
     {
-        Debug.Log("Dbmarker OnInput by " + (HasInputAuthority ? "local " : "remote ") + "player set input " + _accumulatedInput.horizontalValue + " " + _accumulatedInput.verticalValue);
+        //Debug.Log("Dbmarker OnInput by " + (HasInputAuthority ? "local " : "remote ") + "player set input " + _localClientInput.horizontalValue + " " + _localClientInput.verticalValue);
         networkInput.Set(_accumulatedInput);
 
         _resetAccumulatedInput = true;
     }
+
+
 
     public void BeforeUpdate()
     {
@@ -82,8 +94,23 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
         _accumulatedInput.SetAxisByName(_mouseYAxisName, GetAxisLocalValue(_mouseYAxisName));
         _accumulatedInput.SetAxisByName(_controllerHorizontalLookInputName, GetAxisLocalValue(_controllerHorizontalLookInputName));
         _accumulatedInput.SetAxisByName(_controllerVerticalLookInputName, GetAxisLocalValue(_controllerVerticalLookInputName));
-      
-        Debug.Log("Dbmarker collected input " + (HasInputAuthority ? "local " : "remote ") + "player " + _accumulatedInput.horizontalValue + " " + _accumulatedInput.verticalValue);
+        _accumulatedInput.rawLookVector = _fusionUnityInputSystem.GetLocalLookVector(false);
+        _accumulatedInput.currentLookVector = _fusionUnityInputSystem.GetLocalLookVector(true);
+
+        var lookSource = _characterLocomotion.LookSource;
+        var lookSourceTransform = lookSource.Transform;
+        var lookSourcePosition = lookSourceTransform.position;
+        _accumulatedInput.LookSourcePositionX = lookSourcePosition.x;
+        _accumulatedInput.LookSourcePositionY = lookSourcePosition.y;
+        _accumulatedInput.LookSourcePositionZ = lookSourcePosition.z;
+
+        var lookSourceRotation = lookSourceTransform.rotation.eulerAngles;
+        _accumulatedInput.LookSourceRotationX = lookSourceRotation.x;
+        _accumulatedInput.LookSourceRotationY = lookSourceRotation.y;
+        _accumulatedInput.LookSourceRotationZ = lookSourceRotation.z;
+
+
+        Debug.Log("LocInp BU " + (HasInputAuthority ? "local " : "remote ") + "player " + _accumulatedInput.horizontalValue + " " + _accumulatedInput.verticalValue);
     }
 
     public override void FixedUpdateNetwork()
@@ -95,7 +122,7 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
                
                 _receivedCurrentInput = input;
                 
-            Debug.Log("Dbmarker received input " + (HasInputAuthority ? "local " : "remote ") + "player " + _receivedCurrentInput.horizontalValue + " " + _receivedCurrentInput.verticalValue);
+            //Debug.Log("Dbmarker received input " + (HasInputAuthority ? "local " : "remote ") + "player " + _receivedCurrentInput.horizontalValue + " " + _receivedCurrentInput.verticalValue);
             }
        // }
 
