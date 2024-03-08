@@ -198,6 +198,9 @@ public class FusionUltimateCharacterLocomotion : UltimateCharacterLocomotion
             }
             if (syncPlayerToServer)
             {
+                var offset = ServerPosition - transform.position;
+                var dir = offset.normalized;
+                //var correctionAmount = 
                 m_DesiredMovement += (ServerPosition - transform.position).normalized * syncSpeed * Time.deltaTime;
                 if(disp.sqrMagnitude < 0.1f)
                 {

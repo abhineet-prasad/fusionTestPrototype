@@ -154,7 +154,7 @@ namespace Opsive.UltimateCharacterController
             /// Moves the character.
             /// </summary>
             /// <param name="preMove">Should the character be premoved?</param>
-            public void Move(bool preMove)
+            public void Move(bool preMove, bool isServer)
             {
                 if (preMove) {
                     RestoreFixedLocation();
@@ -167,6 +167,8 @@ namespace Opsive.UltimateCharacterController
                     m_Handler.GetPositionInput(out horizontalMovement, out forwardMovement);
                     m_Handler.GetRotationInput(horizontalMovement, forwardMovement, out deltaYaw);
                 }
+                Debug.Log("ORT deltaYaw for "+ m_Locomotion.GetComponent<NetworkObject>().Id +" at " + (isServer ? "server " : "client ") + deltaYaw);
+                
              
                 m_Locomotion.Move(horizontalMovement, forwardMovement, deltaYaw);
                 AssignFixedLocation();
@@ -662,15 +664,16 @@ namespace Opsive.UltimateCharacterController
             }
         }
 
+        bool enableLocalSimulation = true;
         /// <summary>
         /// Executes during the FixedUpdate loop.
         /// </summary>
         protected virtual void FixedUpdate()
         {
-            Debug.Log("NMark FixedUpdate Called without check input" + HasInputAuthority + "  state:" + HasStateAuthority);
-            if (!HasStateAuthority)
+            //Debug.Log("NMark FixedUpdate Called without check input" + HasInputAuthority + "  state:" + HasStateAuthority);
+            if (!HasStateAuthority && enableLocalSimulation)
             {
-                Debug.Log("NMark FixedUpdate Called");
+                //Debug.Log("NMark FixedUpdate Called");
                 MoveSmoothedObjects(-1);
                 MoveCharacters(true, -1);
                 RotateCameras();
@@ -696,7 +699,7 @@ namespace Opsive.UltimateCharacterController
             
             if (HasStateAuthority && enableFUN)
             {
-                Debug.Log("NMark  called on host FUN");
+                //Debug.Log("NMark  called on host FUN");
                 MoveSmoothedObjects(-1);
                 MoveCharacters(true, -1);
                 RotateCameras();
@@ -714,9 +717,9 @@ namespace Opsive.UltimateCharacterController
         /// </summary>
         protected virtual void Update()
         {
-            if (!HasStateAuthority)
+            if (!HasStateAuthority && enableLocalSimulation)
             {
-                Debug.Log("NMark SimpleUpdate Called");
+                //Debug.Log("NMark SimpleUpdate Called");
                 var interpAmount = (Time.time - m_FixedTime) / Time.fixedDeltaTime;
                 MoveSmoothedObjects(interpAmount);
                 MoveCharacters(false, interpAmount);
@@ -727,12 +730,12 @@ namespace Opsive.UltimateCharacterController
 
         public override void Render()
         {
-            Debug.Log("NMark IsInSimulation " + GetComponent<NetworkObject>().IsInSimulation);
+            //Debug.Log("NMark IsInSimulation " + GetComponent<NetworkObject>().IsInSimulation);
             var interpAmount = (Runner.LocalRenderTime - m_FixedTime) / Runner.DeltaTime;
             if (HasStateAuthority && enableFUN)
             {
                 //var interpAmount = (Time.time - m_FixedTime) / Time.fixedDeltaTime;
-                Debug.Log("NMark  called on host R ");
+                //Debug.Log("NMark  called on host R ");
                 MoveSmoothedObjects(interpAmount);
                 MoveCharacters(false, interpAmount);
                 MoveCameras(interpAmount);
@@ -779,8 +782,8 @@ namespace Opsive.UltimateCharacterController
         public void FullMoveCharacters()
         {
             for (int i = 0; i < m_Characters.Count; ++i) {
-                m_Characters[i].Move(true);
-                m_Characters[i].Move(false);
+                m_Characters[i].Move(true, HasStateAuthority);
+                m_Characters[i].Move(false, HasStateAuthority);
             }
         }
 
@@ -793,7 +796,7 @@ namespace Opsive.UltimateCharacterController
         {
             for (int i = 0; i < m_Characters.Count; ++i) {
                 if (interpAmount == -1) {
-                    m_Characters[i].Move(preMove);
+                    m_Characters[i].Move(preMove, HasStateAuthority);
                 } else {
                     if (!m_Characters[i].Locomotion.Interpolate) {
                         continue;

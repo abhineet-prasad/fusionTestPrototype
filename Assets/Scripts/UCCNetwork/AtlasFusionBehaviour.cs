@@ -11,20 +11,23 @@ using Opsive.UltimateCharacterController.Utility.Builders;
 using TMPro;
 using Opsive.Shared.Character;
 using Opsive.Shared.StateSystem;
+using Opsive.UltimateCharacterController.Camera;
+using Opsive.Shared.Camera;
 
 public class AtlasFusionBehaviour : NetworkBehaviour
 {
 
     [SerializeField] TextMeshPro playerLabel;
     UltimateCharacterLocomotion m_CharacterLocomotion;
+    CameraController _cameraController;
+    FusionLookSource _fusionLookSource;
 
     public void Awake()
     {
-        if (gameObject.GetComponent<LocalLookSource>() == null)
-        {
-            gameObject.AddComponent<LocalLookSource>();
-        }
+  
         m_CharacterLocomotion = GetComponent<FusionUltimateCharacterLocomotion>();
+        _cameraController = CameraUtility.FindCamera(null).GetComponent<CameraController>();
+        _fusionLookSource = GetComponent<FusionLookSource>();
     }
 
     public bool IsLocalPlayer => _isLocalPlayer;
@@ -50,16 +53,17 @@ public class AtlasFusionBehaviour : NetworkBehaviour
             _isLocalPlayer = true;
             playerLabel.text = "Local";
             playerLabel.color = Color.cyan;
-            InitializeLocalPlayer();
+            InitializePlayer(true);
             var simNetOb = SimulationManager.Instance.GetComponent<NetworkObject>();
             simNetOb.AssignInputAuthority(Runner.LocalPlayer);
+            
         }
         else
         {
             _isLocalPlayer = false;
             playerLabel.text = "Remote";
             playerLabel.color = Color.red;
-            InitializeRemotePlayer();
+            InitializePlayer(false);
         }
     }
 
@@ -68,6 +72,7 @@ public class AtlasFusionBehaviour : NetworkBehaviour
         if (isLocalPlayer)
         {
             InitializeLocalPlayer();
+            
         }
         else
         {
@@ -98,6 +103,19 @@ public class AtlasFusionBehaviour : NetworkBehaviour
         }
 
         //RemoveUnityInput(character);
+    }
+
+
+    void InitializePlayer(bool isLocalPlayer)
+    {
+        if (isLocalPlayer)
+        {
+            _cameraController.Character = gameObject;
+        }
+        _fusionLookSource.enabled = !isLocalPlayer;
+        ILookSource characterLookSource = isLocalPlayer ? _cameraController : _fusionLookSource;
+        EventHandler.ExecuteEvent<ILookSource>(gameObject, "OnCharacterAttachLookSource", null);
+        EventHandler.ExecuteEvent<ILookSource>(gameObject, "OnCharacterAttachLookSource", characterLookSource);
     }
 
     void InitializeLocalPlayer()

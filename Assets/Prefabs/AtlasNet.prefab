@@ -369,6 +369,7 @@ GameObject:
   - component: {fileID: 339944328027850775}
   - component: {fileID: 3998533142981291057}
   - component: {fileID: 8687321471247907180}
+  - component: {fileID: 6743995939055220457}
   m_Layer: 31
   m_Name: AtlasNet
   m_TagString: Player
@@ -1692,6 +1693,7 @@ MonoBehaviour:
   - {fileID: 6678264764448036545}
   - {fileID: 339944328027850775}
   - {fileID: 8687321471247907180}
+  - {fileID: 6743995939055220457}
 --- !u!114 &2765632045861736257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1724,7 +1726,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerLabel: {fileID: 8049500996743115311}
-  _DesiredPosition: {x: 0, y: 0, z: 0}
+  _ServerPosition: {x: 0, y: 0, z: 0}
+  _ServerRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &339944328027850775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1766,6 +1769,18 @@ MonoBehaviour:
   _InputVector: {x: 0, y: 0}
   _RawInputVector: {x: 0, y: 0}
   _UpdateAnimationParameters: 0
+--- !u!114 &6743995939055220457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4389687500541639179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da5aad0cf1d6a4a71986f74110dfde15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5949087914005232615
 GameObject:
   m_ObjectHideFlags: 0

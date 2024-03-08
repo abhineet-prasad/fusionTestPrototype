@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class FusionPlayerProxy : PlayerInputProxy
 {
+
+
+    
     protected override void Awake()
     {
 

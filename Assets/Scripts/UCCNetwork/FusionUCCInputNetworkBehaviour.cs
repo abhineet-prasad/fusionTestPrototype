@@ -5,6 +5,7 @@ using Fusion;
 using Opsive.Shared.Input;
 using UnityEngine.InputSystem;
 using Opsive.Shared.Game;
+using Opsive.UltimateCharacterController.Character;
 
 public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 {
@@ -19,27 +20,32 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
 
     public UCCInput CurrentInput => _receivedCurrentInput;
     public UCCInput PreviousInput => _receivedPreviousInput;
-    public UCCInput ClientInput => _localClientInput;
+    public UCCInput ClientInput => _accumulatedInput;
 
   
     protected UnityEngine.InputSystem.PlayerInput m_PlayerInput;
     protected Dictionary<InputActionMap, Dictionary<string, InputAction>> m_InputActionByName = new Dictionary<InputActionMap, Dictionary<string, InputAction>>();
 
     private FusionUnityInputSystem _fusionUnityInputSystem;
-
+    private UltimateCharacterLocomotion _characterLocomotion;
     [Networked]
     UCCInput _receivedCurrentInput { get; set; }
 
     UCCInput _receivedPreviousInput;
-    UCCInput _localClientInput;
+    UCCInput _accumulatedInput;
     bool _resetAccumulatedInput = false;
 
+
+    void Awake()
+    {
+        _characterLocomotion = GetComponent<UltimateCharacterLocomotion>();
+    }
 
     public override void Spawned()
     {
         _receivedCurrentInput = default;
         _receivedPreviousInput = default;
-        _localClientInput = default;
+        _accumulatedInput = default;
         _resetAccumulatedInput = false;
 
 
@@ -60,7 +66,7 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
     void OnInput(NetworkRunner runner, NetworkInput networkInput)
     {
         //Debug.Log("Dbmarker OnInput by " + (HasInputAuthority ? "local " : "remote ") + "player set input " + _localClientInput.horizontalValue + " " + _localClientInput.verticalValue);
-        networkInput.Set(_localClientInput);
+        networkInput.Set(_accumulatedInput);
 
         _resetAccumulatedInput = true;
     }
@@ -76,22 +82,35 @@ public class FusionUCCInputNetworkBehaviour : NetworkBehaviour, IBeforeUpdate
         if (_resetAccumulatedInput == true)
         {
             _resetAccumulatedInput = false;
-            _localClientInput = default;
+            _accumulatedInput = default;
         }
-        _localClientInput.mousePosition = Mouse.current.position.ReadValue();
+        _accumulatedInput.mousePosition = Mouse.current.position.ReadValue();
 
         float horizontalValue = GetAxisLocalValue(_horizontalAxisName);
         Debug.Log("Input Asset test " + horizontalValue);
-        _localClientInput.SetAxisByName(_horizontalAxisName, horizontalValue);
-        _localClientInput.SetAxisByName(_verticalAxisName, GetAxisLocalValue(_verticalAxisName));
-        _localClientInput.SetAxisByName(_mouseXAxisName, GetAxisLocalValue(_mouseXAxisName));
-        _localClientInput.SetAxisByName(_mouseYAxisName, GetAxisLocalValue(_mouseYAxisName));
-        _localClientInput.SetAxisByName(_controllerHorizontalLookInputName, GetAxisLocalValue(_controllerHorizontalLookInputName));
-        _localClientInput.SetAxisByName(_controllerVerticalLookInputName, GetAxisLocalValue(_controllerVerticalLookInputName));
-        _localClientInput.rawLookVector = _fusionUnityInputSystem.GetLocalLookVector(false);
-        _localClientInput.currentLookVector = _fusionUnityInputSystem.GetLocalLookVector(true);
+        _accumulatedInput.SetAxisByName(_horizontalAxisName, horizontalValue);
+        _accumulatedInput.SetAxisByName(_verticalAxisName, GetAxisLocalValue(_verticalAxisName));
+        _accumulatedInput.SetAxisByName(_mouseXAxisName, GetAxisLocalValue(_mouseXAxisName));
+        _accumulatedInput.SetAxisByName(_mouseYAxisName, GetAxisLocalValue(_mouseYAxisName));
+        _accumulatedInput.SetAxisByName(_controllerHorizontalLookInputName, GetAxisLocalValue(_controllerHorizontalLookInputName));
+        _accumulatedInput.SetAxisByName(_controllerVerticalLookInputName, GetAxisLocalValue(_controllerVerticalLookInputName));
+        _accumulatedInput.rawLookVector = _fusionUnityInputSystem.GetLocalLookVector(false);
+        _accumulatedInput.currentLookVector = _fusionUnityInputSystem.GetLocalLookVector(true);
 
-        Debug.Log("LocInp BU " + (HasInputAuthority ? "local " : "remote ") + "player " + _localClientInput.horizontalValue + " " + _localClientInput.verticalValue);
+        var lookSource = _characterLocomotion.LookSource;
+        var lookSourceTransform = lookSource.Transform;
+        var lookSourcePosition = lookSourceTransform.position;
+        _accumulatedInput.LookSourcePositionX = lookSourcePosition.x;
+        _accumulatedInput.LookSourcePositionY = lookSourcePosition.y;
+        _accumulatedInput.LookSourcePositionZ = lookSourcePosition.z;
+
+        var lookSourceRotation = lookSourceTransform.rotation.eulerAngles;
+        _accumulatedInput.LookSourceRotationX = lookSourceRotation.x;
+        _accumulatedInput.LookSourceRotationY = lookSourceRotation.y;
+        _accumulatedInput.LookSourceRotationZ = lookSourceRotation.z;
+
+
+        Debug.Log("LocInp BU " + (HasInputAuthority ? "local " : "remote ") + "player " + _accumulatedInput.horizontalValue + " " + _accumulatedInput.verticalValue);
     }
 
     public override void FixedUpdateNetwork()

@@ -19,7 +19,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     NetworkRunner _runner;
 
     [SerializeField] NetworkPrefabRef _playerPrefab;
-    [SerializeField] NetworkPrefabRef _gamePrefab;
+    [SerializeField] NetworkPrefabRef _lookSourcePrefab;
 
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
@@ -78,8 +78,18 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             // Create a unique position for the player
             Vector3 spawnPosition = new Vector3(UnityEngine.Random.Range(10,20), 1, 0);
 
-        //    NetworkObject networkGameObjet = runner.Spawn(_gamePrefab, Vector3.zero, Quaternion.identity, player);
-            NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
+            //NetworkObject networkLookSourceObject = runner.Spawn(_lookSourcePrefab, spawnPosition, Quaternion.identity, player, (runner, obj) =>
+            //{
+                
+            //});
+
+            NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player,(runner, obj) =>
+            {
+                
+            });
+
+           
+
             //NetworkObject networkPlayerObject = runner.Spawn(_atlasPrefab, spawnPosition, Quaternion.identity, player);
             // Keep track of the player avatars for easy access
             _spawnedCharacters.Add(player, networkPlayerObject);

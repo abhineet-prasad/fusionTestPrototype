@@ -69,7 +69,7 @@ public class FusionUnityInputSystem : UnityInputSystem
         }
         else
         {
-            Debug.Log("LocInp "+ name+" " + _networkInput.ClientInput.GetAxisByName(name));
+            //Debug.Log("LocInp "+ name+" " + _networkInput.ClientInput.GetAxisByName(name));
             return _networkInput.ClientInput.GetAxisByName(name);
         }
     }
@@ -139,10 +139,15 @@ public class FusionUnityInputSystem : UnityInputSystem
 
         if (_networkInput.Runner.IsServer)
         {
-            return smoothed ? _networkInput.CurrentInput.currentLookVector : _networkInput.CurrentInput.rawLookVector;
+            
+            var val = smoothed ? _networkInput.CurrentInput.currentLookVector : _networkInput.CurrentInput.rawLookVector;
+            //Debug.Log("ORT server Look vector " + val);
+            return val;
         }
         else
         {
+            var val = base.GetLookVector(smoothed);
+            //Debug.Log("ORT client Look vector " + val);
             return base.GetLookVector(smoothed);
         }
 
